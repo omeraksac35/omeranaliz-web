@@ -61,6 +61,32 @@ export default function OverallRecommendation({ data, colors }: Props) {
         </View>
       )}
 
+      {data.entry_plan && data.entry_plan.action === 'BEKLE' && (
+        <View style={styles.entryPlanBox}>
+          <Text style={styles.entryPlanTitle}>İzlenecek Seviyeler</Text>
+          {data.entry_plan.resistance && (
+            <Text style={styles.entryPlanRow}>
+              Direnç (üstüne çıkarsa AL güçlenir): {fmt(data.entry_plan.resistance.level)} TL (
+              {data.entry_plan.resistance.pct > 0 ? '+' : ''}
+              {fmt(data.entry_plan.resistance.pct, 1)}%)
+              {data.entry_plan.resistance.probability
+                ? ` — tarihsel olasılık %${fmt(data.entry_plan.resistance.probability.probability_pct, 1)}`
+                : ''}
+            </Text>
+          )}
+          {data.entry_plan.support && (
+            <Text style={styles.entryPlanRow}>
+              Destek (altına inerse SAT güçlenir): {fmt(data.entry_plan.support.level)} TL (
+              {fmt(data.entry_plan.support.pct, 1)}%)
+              {data.entry_plan.support.probability
+                ? ` — tarihsel olasılık %${fmt(data.entry_plan.support.probability.probability_pct, 1)}`
+                : ''}
+            </Text>
+          )}
+          <Text style={styles.entryPlanNote}>{data.entry_plan.note}</Text>
+        </View>
+      )}
+
       {data.target && data.probability ? (
         <View style={styles.targetBox}>
           <Text style={styles.targetTitle}>
@@ -78,9 +104,11 @@ export default function OverallRecommendation({ data, colors }: Props) {
           </Text>
         </View>
       ) : (
-        <Text style={styles.noTarget}>
-          Net bir yön olmadığı için hedef seviye ve olasılık gösterilmiyor.
-        </Text>
+        !data.entry_plan && (
+          <Text style={styles.noTarget}>
+            Bu hisse için yeterli direnç/destek verisi bulunamadı, seviye ve olasılık gösterilmiyor.
+          </Text>
+        )
       )}
 
       <Text style={styles.disclaimer}>{data.note}</Text>

@@ -182,6 +182,19 @@ export interface SellEntryPlan {
   note: string;
 }
 
+export interface LevelReference {
+  level: number;
+  pct: number;
+  probability: MoveProbability | null;
+}
+
+export interface WaitEntryPlan {
+  action: 'BEKLE';
+  resistance: LevelReference | null;
+  support: LevelReference | null;
+  note: string;
+}
+
 export interface OverallRecommendation {
   signal: string;
   is_buy_signal: boolean;
@@ -190,7 +203,7 @@ export interface OverallRecommendation {
   is_speculative: boolean;
   target: RecommendationTarget | null;
   probability: MoveProbability | null;
-  entry_plan: BuyEntryPlan | SellEntryPlan | null;
+  entry_plan: BuyEntryPlan | SellEntryPlan | WaitEntryPlan | null;
   note: string;
 }
 
