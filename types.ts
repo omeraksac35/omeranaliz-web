@@ -154,12 +154,54 @@ export interface ChartResult {
   note: string;
 }
 
+export interface RecommendationTarget {
+  level: number;
+  type: 'direnç' | 'destek';
+  target_pct: number;
+}
+
+export interface MoveProbability {
+  window_trading_days: number;
+  required_move_pct: number;
+  probability_pct: number;
+  sample_size: number;
+}
+
+export interface BuyEntryPlan {
+  action: 'AL';
+  buy_level: number;
+  stop_loss: number;
+  take_profit: number;
+  note: string;
+}
+
+export interface SellEntryPlan {
+  action: 'SAT';
+  sell_level: number;
+  watch_level: number | null;
+  note: string;
+}
+
+export interface OverallRecommendation {
+  signal: string;
+  is_buy_signal: boolean;
+  reason: string;
+  volatility_pct: number;
+  is_speculative: boolean;
+  target: RecommendationTarget | null;
+  probability: MoveProbability | null;
+  entry_plan: BuyEntryPlan | SellEntryPlan | null;
+  note: string;
+}
+
 export interface AnalysisResult {
   ticker: string;
   price: number;
+  saatlik: TimeframeResult;
   kisa_vadeli: TimeframeResult;
   uzun_vadeli: TimeframeResult;
   consistency_note: string;
+  genel_tavsiye: OverallRecommendation;
   fundamentals: Fundamentals;
   fund_verdict: string;
   fund_notes: string[];

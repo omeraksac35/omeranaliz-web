@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import OverallRecommendation from './OverallRecommendation';
 import TimeframeCard from './TimeframeCard';
 import type { ThemeColors } from './theme';
 import type { AnalysisResult } from './types';
@@ -36,10 +37,13 @@ export default function ResultCard({ result, colors, isFavorite, onToggleFavorit
         </Pressable>
       </View>
 
+      <OverallRecommendation data={result.genel_tavsiye} colors={colors} />
+
       <View style={styles.consistencyBox}>
         <Text style={styles.consistencyText}>{result.consistency_note}</Text>
       </View>
 
+      <TimeframeCard data={result.saatlik} colors={colors} />
       <TimeframeCard data={result.kisa_vadeli} colors={colors} />
       <TimeframeCard data={result.uzun_vadeli} colors={colors} />
 

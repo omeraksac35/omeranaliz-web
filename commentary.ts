@@ -12,6 +12,17 @@ export function buildCommentary(result: AnalysisResult, news: NewsResult | null)
     `Kısa vadede (günlük) sinyal ${result.kisa_vadeli.signal}, uzun vadede (haftalık) sinyal ${result.uzun_vadeli.signal}. ${result.consistency_note}`
   );
 
+  const gt = result.genel_tavsiye;
+  if (gt.target && gt.probability) {
+    parts.push(
+      `Saatlik+günlük birleşik öneri: ${gt.signal}. ${gt.reason} En yakın ${gt.target.type} ${gt.target.level} TL seviyesinde; geçmişte benzer büyüklükte hareketlerin görülme sıklığı %${gt.probability.probability_pct} (bu bir garanti değil, tarihsel sıklık).${
+        gt.is_speculative ? ' Oynaklık yüksek, spekülatif bir hisse.' : ''
+      }`
+    );
+  } else {
+    parts.push(`Saatlik+günlük birleşik öneri: ${gt.signal}. ${gt.reason}`);
+  }
+
   const fundNotesText = result.fund_notes.map((n) => n.replace(/^[+-]\s*/, '')).join(', ');
   parts.push(
     `Bilanço tarafında şirket "${result.fund_verdict}" olarak değerlendiriliyor${
