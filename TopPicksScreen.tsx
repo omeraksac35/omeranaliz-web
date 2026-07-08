@@ -104,8 +104,9 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
       <View style={styles.headerBox}>
         <Text style={styles.headerTitle}>🚀 Yükselme Potansiyeli Sıralaması</Text>
         <Text style={styles.headerText}>
-          Taranan tüm hisseler (BIST100/BIST30'a yakın kapsam), hedef seviyeye ulaşma
-          olasılığına (tarihsel sıklık) göre sıralanır. Destek yakınlığı, önündeki direnç
+          Taranan tüm hisseler (BIST100/BIST30'a yakın kapsam, 100+ hisse), önce hedefe ne
+          kadar gidebileceğine, sonra bu seviyeye ulaşma olasılığına (tarihsel sıklık) göre
+          sıralanır. %1'in altındaki hareketler önerilmez. Destek yakınlığı, önündeki direnç
           durumu ve güncel kritik haberler dahildir. Liste otomatik olarak saatte bir
           güncellenir. Bu bir yatırım tavsiyesi değildir.
         </Text>
