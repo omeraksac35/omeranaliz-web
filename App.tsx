@@ -10,11 +10,13 @@ import LoginScreen from './LoginScreen';
 import RiskyStocksScreen from './RiskyStocksScreen';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import TickerTape from './TickerTape';
+import TopPicksScreen from './TopPicksScreen';
 
-type Tab = 'analiz' | 'karsilastir' | 'riskli';
+type Tab = 'analiz' | 'karsilastir' | 'riskli' | 'oneriler';
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'analiz', label: 'Analiz', icon: '📊' },
+  { key: 'oneriler', label: 'Öneriler', icon: '🚀' },
   { key: 'karsilastir', label: 'Karşılaştır', icon: '⚖️' },
   { key: 'riskli', label: 'Riskli Hisseler', icon: '🔥' },
 ];
@@ -23,7 +25,13 @@ function Root() {
   const { mode, colors, toggleMode } = useTheme();
   const { isAuthenticated, isChecking, logout } = useAuth();
   const [tab, setTab] = useState<Tab>('analiz');
+  const [pendingSymbol, setPendingSymbol] = useState<string | null>(null);
   const styles = makeStyles(colors);
+
+  function goToAnalyze(ticker: string) {
+    setPendingSymbol(ticker);
+    setTab('analiz');
+  }
 
   if (isChecking) {
     return (
@@ -80,7 +88,14 @@ function Root() {
         ))}
       </View>
 
-      {tab === 'analiz' && <AnalyzeScreen colors={colors} />}
+      {tab === 'analiz' && (
+        <AnalyzeScreen
+          colors={colors}
+          pendingSymbol={pendingSymbol}
+          onConsumePendingSymbol={() => setPendingSymbol(null)}
+        />
+      )}
+      {tab === 'oneriler' && <TopPicksScreen colors={colors} onSelectTicker={goToAnalyze} />}
       {tab === 'karsilastir' && <CompareScreen colors={colors} />}
       {tab === 'riskli' && <RiskyStocksScreen colors={colors} />}
     </View>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,15 +21,25 @@ import { useWatchlist } from './useWatchlist';
 
 interface Props {
   colors: ThemeColors;
+  pendingSymbol?: string | null;
+  onConsumePendingSymbol?: () => void;
 }
 
-export default function AnalyzeScreen({ colors }: Props) {
+export default function AnalyzeScreen({ colors, pendingSymbol, onConsumePendingSymbol }: Props) {
   const [symbol, setSymbol] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const { recent, favorites, addRecent, toggleFavorite, isFavorite } = useWatchlist();
   const news = useNews(result?.ticker ?? null);
+
+  useEffect(() => {
+    if (!pendingSymbol) return;
+    setSymbol(pendingSymbol);
+    runAnalysis(pendingSymbol);
+    onConsumePendingSymbol?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSymbol]);
 
   async function runAnalysis(rawSymbol: string) {
     const trimmed = rawSymbol.trim();

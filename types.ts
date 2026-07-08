@@ -195,6 +195,27 @@ export interface WaitEntryPlan {
   note: string;
 }
 
+export interface TopPick {
+  ticker: string;
+  price: number;
+  signal: string;
+  reason: string;
+  target_level: number;
+  target_pct: number;
+  probability_pct: number;
+  volatility_pct: number;
+  is_speculative: boolean;
+}
+
+export interface TopPicksResult {
+  picks: TopPick[];
+  scanned_count: number;
+  matched_count: number;
+  last_updated_unix: number;
+  cache_ttl_seconds: number;
+  note: string;
+}
+
 export interface OverallRecommendation {
   signal: string;
   is_buy_signal: boolean;
