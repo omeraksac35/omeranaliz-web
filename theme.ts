@@ -56,7 +56,7 @@ export function getColors(mode: ThemeMode): ThemeColors {
 }
 
 export function signalColor(colors: ThemeColors, signal: string): string {
-  if (signal === 'AL') return colors.bullish;
+  if (signal === 'AL' || signal === 'GÜÇLÜ AL') return colors.bullish;
   if (signal === 'DİKKATLİ AL') return colors.caution;
   if (signal === 'SAT') return colors.bearish;
   return colors.neutral;

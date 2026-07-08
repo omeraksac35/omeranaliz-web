@@ -198,13 +198,15 @@ export interface WaitEntryPlan {
 export interface TopPick {
   ticker: string;
   price: number;
-  signal: string;
-  reason: string;
-  target_level: number;
-  target_pct: number;
-  probability_pct: number;
+  potential_label: string;
+  target_level: number | null;
+  target_pct: number | null;
+  probability_pct: number | null;
+  has_resistance_overhead: boolean;
+  support_level: number | null;
+  support_distance_pct: number | null;
   volatility_pct: number;
-  is_speculative: boolean;
+  critical_news_categories: string[];
 }
 
 export interface TopPicksResult {

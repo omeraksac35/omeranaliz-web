@@ -30,27 +30,40 @@ function PickCard({ pick, colors, rank, onPress }: { pick: TopPick; colors: Them
         <Text style={styles.rank}>#{rank}</Text>
         <Text style={styles.ticker}>{pick.ticker.replace('.IS', '')}</Text>
         <Text style={styles.price}>{fmt(pick.price)} TL</Text>
-        <View style={[styles.signalBadge, { backgroundColor: signalColor(colors, pick.signal) }]}>
-          <Text style={styles.signalText}>{pick.signal}</Text>
+        <View style={[styles.signalBadge, { backgroundColor: signalColor(colors, pick.potential_label) }]}>
+          <Text style={styles.signalText}>{pick.potential_label}</Text>
         </View>
       </View>
 
-      {pick.is_speculative && (
-        <View style={styles.speculativeBadge}>
-          <Text style={styles.speculativeText}>SPEKÜLATİF</Text>
+      {pick.probability_pct !== null && pick.target_level !== null ? (
+        <View style={styles.metricsRow}>
+          <Text style={styles.probabilityValue}>%{fmt(pick.probability_pct, 1)}</Text>
+          <Text style={styles.metricLabel}>olasılıkla</Text>
+          <Text style={styles.targetValue}>{fmt(pick.target_level)} TL</Text>
+          <Text style={styles.metricLabel}>
+            (+{fmt(pick.target_pct ?? 0, 1)}%) görebilir
+          </Text>
         </View>
+      ) : (
+        <Text style={styles.metricLabel}>Belirgin bir hedef seviye tespit edilemedi.</Text>
       )}
 
-      <Text style={styles.reason}>{pick.reason}</Text>
+      <Text style={styles.detailRow}>
+        {pick.has_resistance_overhead
+          ? `Önünde direnç var (${fmt(pick.target_level ?? 0)} TL civarı)`
+          : 'Önünde belirgin bir direnç yok (1 yıllık zirve referans alındı)'}
+        {pick.support_distance_pct !== null && ` · Desteğine %${fmt(pick.support_distance_pct, 1)} uzaklıkta`}
+      </Text>
 
-      <View style={styles.metricsRow}>
-        <Text style={styles.probabilityValue}>%{fmt(pick.probability_pct, 1)}</Text>
-        <Text style={styles.metricLabel}>olasılıkla</Text>
-        <Text style={styles.targetValue}>{fmt(pick.target_level)} TL</Text>
-        <Text style={styles.metricLabel}>
-          (+{fmt(pick.target_pct, 1)}%) seviyesine gidebilir
-        </Text>
-      </View>
+      {pick.critical_news_categories.length > 0 && (
+        <View style={styles.newsRow}>
+          {pick.critical_news_categories.map((c) => (
+            <View key={c} style={styles.newsBadge}>
+              <Text style={styles.newsBadgeText}>{c}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <Text style={styles.volatility}>Yıllıklandırılmış oynaklık: %{fmt(pick.volatility_pct, 1)}</Text>
     </Pressable>
@@ -66,10 +79,10 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
   const load = useCallback((forceRefresh: boolean) => {
     setLoading(true);
     setError(null);
-    fetch(`${API_BASE_URL}/top-picks?top_n=15${forceRefresh ? '&force_refresh=true' : ''}`)
+    fetch(`${API_BASE_URL}/top-picks?top_n=20${forceRefresh ? '&force_refresh=true' : ''}`)
       .then(async (resp) => {
         const json = await resp.json();
-        if (!resp.ok) throw new Error(json.detail || 'Önerilen hisseler alınamadı.');
+        if (!resp.ok) throw new Error(json.detail || 'Hisse sıralaması alınamadı.');
         setData(json as TopPicksResult);
       })
       .catch((e) => setError(e.message || 'Sunucuya bağlanılamadı.'))
@@ -89,10 +102,11 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerBox}>
-        <Text style={styles.headerTitle}>🚀 Yükselme Potansiyeli Yüksek Hisseler</Text>
+        <Text style={styles.headerTitle}>🚀 Yükselme Potansiyeli Sıralaması</Text>
         <Text style={styles.headerText}>
-          Saatlik + günlük teknik sinyali birlikte AL yönünde olan hisseler, hedef seviyeye
-          ulaşma olasılığına (tarihsel sıklık) göre sıralanır. Liste otomatik olarak saatte bir
+          Taranan tüm hisseler (BIST100/BIST30'a yakın kapsam), hedef seviyeye ulaşma
+          olasılığına (tarihsel sıklık) göre sıralanır. Destek yakınlığı, önündeki direnç
+          durumu ve güncel kritik haberler dahildir. Liste otomatik olarak saatte bir
           güncellenir. Bu bir yatırım tavsiyesi değildir.
         </Text>
       </View>
@@ -112,9 +126,8 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
       {data && data.picks.length === 0 && !loading && (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyText}>
-            Şu anda taranan {data.scanned_count} hisse arasında net bir AL sinyali veren yok —
-            piyasa genelinde temkinli/kararsız bir görünüm var. Liste saatlik olarak otomatik
-            güncellenir, daha sonra tekrar kontrol edebilirsin.
+            Şu anda hiçbir hisse için veri hesaplanamadı. Birkaç saniye sonra "Şimdi Yenile"yi
+            deneyebilirsin.
           </Text>
         </View>
       )}
@@ -132,7 +145,7 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
 
       {data && (
         <Text style={styles.note}>
-          {data.note} ({data.matched_count}/{data.scanned_count} hisse eşleşti)
+          {data.note} ({data.matched_count}/{data.scanned_count} hisse hesaplandı)
         </Text>
       )}
     </ScrollView>
@@ -192,20 +205,19 @@ function makeCardStyles(colors: ThemeColors) {
     price: { fontSize: 14, color: colors.text },
     signalBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
     signalText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-    speculativeBadge: {
-      alignSelf: 'flex-start',
-      backgroundColor: colors.caution,
-      borderRadius: 6,
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      marginTop: 6,
-    },
-    speculativeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-    reason: { fontSize: 12, color: colors.textMuted, marginTop: 6, marginBottom: 8 },
-    metricsRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 4 },
+    metricsRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 4, marginTop: 8 },
     probabilityValue: { fontSize: 20, fontWeight: '800', color: colors.bullish },
     metricLabel: { fontSize: 12, color: colors.textSecondary },
     targetValue: { fontSize: 15, fontWeight: '700', color: colors.text },
-    volatility: { fontSize: 11, color: colors.textMuted, marginTop: 6 },
+    detailRow: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
+    newsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+    newsBadge: {
+      backgroundColor: colors.chipBackground,
+      borderRadius: 6,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    newsBadgeText: { fontSize: 11, color: colors.text, fontWeight: '600' },
+    volatility: { fontSize: 11, color: colors.textMuted, marginTop: 8 },
   });
 }
