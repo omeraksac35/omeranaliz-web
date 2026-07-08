@@ -48,6 +48,17 @@ function PickCard({ pick, colors, rank, onPress }: { pick: TopPick; colors: Them
         <Text style={styles.metricLabel}>Belirgin bir hedef seviye tespit edilemedi.</Text>
       )}
 
+      {pick.downside_probability_pct !== null && pick.support_level !== null && (
+        <View style={styles.metricsRow}>
+          <Text style={styles.downsideValue}>%{fmt(pick.downside_probability_pct, 1)}</Text>
+          <Text style={styles.metricLabel}>olasılıkla</Text>
+          <Text style={styles.targetValue}>{fmt(pick.support_level)} TL</Text>
+          <Text style={styles.metricLabel}>
+            (-{fmt(Math.abs(pick.support_distance_pct ?? 0), 1)}%) düşebilir
+          </Text>
+        </View>
+      )}
+
       <Text style={styles.detailRow}>
         {pick.has_resistance_overhead
           ? `Önünde direnç var (${fmt(pick.target_level ?? 0)} TL civarı)`
@@ -104,10 +115,10 @@ export default function TopPicksScreen({ colors, onSelectTicker }: Props) {
       <View style={styles.headerBox}>
         <Text style={styles.headerTitle}>🚀 Yükselme Potansiyeli Sıralaması</Text>
         <Text style={styles.headerText}>
-          Taranan tüm hisseler (BIST100/BIST30'a yakın kapsam, 100+ hisse), önce hedefe ne
-          kadar gidebileceğine, sonra bu seviyeye ulaşma olasılığına (tarihsel sıklık) göre
-          sıralanır. %1'in altındaki hareketler önerilmez. Destek yakınlığı, önündeki direnç
-          durumu ve güncel kritik haberler dahildir. Liste otomatik olarak saatte bir
+          Taranan tüm hisseler (BIST100/BIST30'a yakın kapsam, 100+ hisse) hem yükselme hem
+          düşme olasılığına göre değerlendirilir. Düşme olasılığı yükselme olasılığından
+          yüksekse AL önerilmez; yükselme olasılığı %50'nin üzerindeyse GÜÇLÜ AL. Liste önce
+          bu güce, sonra hedefe ne kadar gidebileceğine göre sıralanır ve saatte bir otomatik
           güncellenir. Bu bir yatırım tavsiyesi değildir.
         </Text>
       </View>
@@ -208,6 +219,7 @@ function makeCardStyles(colors: ThemeColors) {
     signalText: { color: '#fff', fontWeight: '700', fontSize: 12 },
     metricsRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 4, marginTop: 8 },
     probabilityValue: { fontSize: 20, fontWeight: '800', color: colors.bullish },
+    downsideValue: { fontSize: 16, fontWeight: '700', color: colors.bearish },
     metricLabel: { fontSize: 12, color: colors.textSecondary },
     targetValue: { fontSize: 15, fontWeight: '700', color: colors.text },
     detailRow: { fontSize: 12, color: colors.textMuted, marginTop: 6 },

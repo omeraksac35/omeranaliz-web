@@ -205,6 +205,7 @@ export interface TopPick {
   has_resistance_overhead: boolean;
   support_level: number | null;
   support_distance_pct: number | null;
+  downside_probability_pct: number | null;
   volatility_pct: number;
   critical_news_categories: string[];
 }
